@@ -1,0 +1,33 @@
+name: Sign the Hack
+version: 1.0.0-SNAPSHOT
+main: xyz.qincai.signthehack.SignTheHackPlugin
+api-version: '1.21'
+authors: [QinCai]
+website: https://github.com/QinCai-rui/Sign-the-Hack
+softdepend:
+  - PlaceholderAPI
+  - GrimAC
+  - Vulcan
+  - Spartan
+commands:
+  signthehack:
+    description: Scan players with sign translation vulnerability probes
+    usage: /signthehack <player> [mod1,mod2,...] | reload | alerts | diagnose
+    aliases: [sth, hacksign]
+permissions:
+  signthehack.check:
+    description: Allow scanning players and trigger scans
+    default: op
+  signthehack.reload:
+    description: Allow reloading plugin files
+    default: op
+  signthehack.alerts:
+    description: Allow toggling and receiving alerts
+    default: op
+  signthehack.*:
+    description: Full access to Sign the Hack
+    default: op
+    children:
+      signthehack.check: true
+      signthehack.reload: true
+      signthehack.alerts: true
