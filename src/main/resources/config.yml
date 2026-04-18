@@ -11,6 +11,8 @@ probe:
   delay-between-signs-ticks: 12
   # Client response timeout in ticks. Timeout is classified as PROTECTED.
   timeout-ticks: 60
+  # Hide probe signs/barriers from player view using client-side fake blocks.
+  invisible-signs: true
 
 check-sets:
   # Used by /signthehack <player>

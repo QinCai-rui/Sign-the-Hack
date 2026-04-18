@@ -105,6 +105,7 @@ public final class ConfigManager {
                 cfg.getInt("probe.max-checks-per-sign", 3),
                 cfg.getLong("probe.delay-between-signs-ticks", 10L),
                 cfg.getLong("probe.timeout-ticks", 60L),
+                cfg.getBoolean("probe.invisible-signs", true),
                 cfg.getStringList("check-sets.manual-default"),
                 cfg.getStringList("check-sets.join"),
                 cfg.getStringList("check-sets.anticheat"),

@@ -9,6 +9,7 @@ public record AppConfig(
         int maxChecksPerSign,
         long delayBetweenSignsTicks,
         long probeTimeoutTicks,
+        boolean invisibleSigns,
         List<String> manualDefaultChecks,
         List<String> joinChecks,
         List<String> anticheatChecks,

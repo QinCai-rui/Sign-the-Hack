@@ -18,6 +18,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
 import org.bukkit.block.sign.Side;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -130,6 +131,7 @@ public final class ScanService {
         context.currentPlacement = placement;
         context.timeoutTask = Bukkit.getScheduler().runTaskLater(plugin, () -> onTimeout(context), configManager.appConfig().probeTimeoutTicks());
         SignProbeTransport.setAllowedEditor(placement.signBlock().getLocation(), context.target.getUniqueId(), plugin);
+        maskProbeForViewers(context.target, placement);
         Bukkit.getScheduler().runTask(plugin, () -> {
             if (!active.containsKey(context.target.getUniqueId())) {
                 return;
@@ -140,7 +142,14 @@ public final class ScanService {
                     return;
                 }
                 SignProbeTransport.sendOpenSignEditor(context.target, placement.signBlock().getLocation(), plugin);
-                context.target.sendBlockChange(placement.signBlock().getLocation(), Material.AIR.createBlockData());
+                if (configManager.appConfig().invisibleSigns()) {
+                    context.target.sendBlockChange(placement.signBlock().getLocation(), placement.originalSignState().getBlockData());
+                    if (placement.barrierPlaced && placement.supportLocation != null && placement.originalSupportState != null) {
+                        context.target.sendBlockChange(placement.supportLocation, placement.originalSupportState.getBlockData());
+                    }
+                } else {
+                    context.target.sendBlockChange(placement.signBlock().getLocation(), Material.AIR.createBlockData());
+                }
             }, 1L);
         });
     }
@@ -155,6 +164,7 @@ public final class ScanService {
         Block supportBlock = location.clone().add(0, -1, 0).getBlock();
 
         BlockState originalSignState = signBlock.getState();
+        BlockState originalSupportState = supportBlock.getState();
         Location supportLocation = supportBlock.getLocation();
         boolean barrierPlaced = supportBlock.getType().isAir();
         if (barrierPlaced) {
@@ -177,7 +187,7 @@ public final class ScanService {
         }
         front.line(3, Component.keybind("key.forward"));
         sign.update(true, false);
-        return new ProbePlacement(signBlock, originalSignState, barrierPlaced, supportLocation);
+        return new ProbePlacement(signBlock, originalSignState, barrierPlaced, supportLocation, originalSupportState);
     }
 
     private Component buildProbeComponent(CheckDefinition check) {
@@ -264,6 +274,27 @@ public final class ScanService {
         });
     }
 
+    private void maskProbeForViewers(Player target, ProbePlacement placement) {
+        if (!configManager.appConfig().invisibleSigns()) {
+            return;
+        }
+
+        Location signLocation = placement.signBlock().getLocation();
+        BlockData originalSignData = placement.originalSignState.getBlockData();
+        BlockData originalSupportData = placement.originalSupportState != null ? placement.originalSupportState.getBlockData() : null;
+
+        for (Player viewer : Bukkit.getOnlinePlayers()) {
+            if (!viewer.isOnline() || viewer.getUniqueId().equals(target.getUniqueId())) {
+                continue;
+            }
+
+            viewer.sendBlockChange(signLocation, originalSignData);
+            if (placement.barrierPlaced && placement.supportLocation != null && originalSupportData != null) {
+                viewer.sendBlockChange(placement.supportLocation, originalSupportData);
+            }
+        }
+    }
+
     public synchronized void cancelAll() {
         for (ScanContext context : active.values()) {
             if (context.timeoutTask != null) {
@@ -302,7 +333,8 @@ public final class ScanService {
             Block signBlock,
             BlockState originalSignState,
             boolean barrierPlaced,
-            Location supportLocation
+            Location supportLocation,
+            BlockState originalSupportState
     ) {
     }
 }
