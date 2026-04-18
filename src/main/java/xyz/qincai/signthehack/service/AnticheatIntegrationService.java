@@ -5,7 +5,6 @@ import xyz.qincai.signthehack.detection.ScanReason;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
-import org.bukkit.event.EventException;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.EventExecutor;
@@ -51,7 +50,7 @@ public final class AnticheatIntegrationService {
             Bukkit.getPluginManager().registerEvent((Class<? extends Event>) eventClass, new Listener() { }, EventPriority.MONITOR, executor, plugin, true);
             active.put(sourceKey, true);
             plugin.getLogger().info("Hooked anticheat source " + sourceKey + " via " + eventClassName);
-        } catch (ClassNotFoundException | EventException ex) {
+        } catch (ClassNotFoundException ex) {
             active.put(sourceKey, false);
             plugin.getLogger().warning("Anticheat source " + sourceKey + " detected but API class not available: " + ex.getMessage());
         }
