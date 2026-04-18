@@ -59,8 +59,21 @@ public final class SqlMigrations {
         String sql = readMigration(migration);
         validateChecksum(migration, sql);
         try (Statement statement = connection.createStatement()) {
-            statement.execute(sql);
+            for (String sqlStatement : splitSqlStatements(sql)) {
+                statement.execute(sqlStatement);
+            }
         }
+    }
+
+    private List<String> splitSqlStatements(String sql) {
+        List<String> statements = new ArrayList<>();
+        for (String segment : sql.split(";")) {
+            String trimmed = segment.trim();
+            if (!trimmed.isEmpty()) {
+                statements.add(trimmed);
+            }
+        }
+        return statements;
     }
 
     private void validateChecksum(String migration, String sql) throws IOException {
