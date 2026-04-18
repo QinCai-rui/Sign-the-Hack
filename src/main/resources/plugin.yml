@@ -1,4 +1,4 @@
-name: Sign the Hack
+name: SignTheHack
 version: 1.0.0-SNAPSHOT
 main: xyz.qincai.signthehack.SignTheHackPlugin
 api-version: '1.21'
