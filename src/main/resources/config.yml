@@ -1,0 +1,78 @@
+# Sign the Hack main config
+# All messages support MiniMessage, and PlaceholderAPI placeholders if PAPI is installed.
+
+debug: false
+locale: en
+
+probe:
+  # Max checks packed in one probe sign (1-3 recommended)
+  max-checks-per-sign: 3
+  # Delay between sequential probe signs in ticks
+  delay-between-signs-ticks: 12
+  # Client response timeout in ticks. Timeout is classified as PROTECTED.
+  timeout-ticks: 60
+
+check-sets:
+  # Used by /signthehack <player>
+  manual-default:
+    - meteor-client
+    - liquidbounce
+    - freecam
+    - xray-fabric
+    - chestesp
+    - killaura-fabric
+  # Used by automatic join scan
+  join:
+    - meteor-client
+    - freecam
+    - wurst
+    - antiafk
+  # Used when anticheat-trigger scan occurs
+  anticheat:
+    - killaura-fabric
+    - autoclicker-fabric
+    - auto-clicker-mc
+    - liquidbounce
+
+auto:
+  join:
+    enabled: true
+    delay-ticks: 80
+    first-join-only: false
+
+cooldown:
+  manual-seconds: 15
+  join-seconds: 180
+  anticheat-seconds: 60
+
+bedrock-skip:
+  enabled: true
+  prefixes:
+    - "."
+    - "*"
+
+actions:
+  # Commands run by console when any DETECTED result exists.
+  on-detected:
+    - "kick <name> Unfair client detected: <results>"
+  # Commands run by console when no DETECTED but any PROTECTED exists.
+  on-protected:
+    - "tell <name> Please disable translation/keybind protection mods. Triggering checks: <results>"
+  # Commands run by console when scan is clean (NOT_DETECTED/SKIPPED only).
+  on-clean:
+    - "tell <name> Scan clean."
+  # Reason shown to player when action hooks execute.
+  # Must include exact check id|display name|status in <results>.
+  reason-template: "<red>Sign the Hack action triggered.</red> <gray>Checks:</gray> <white><results></white>"
+
+webhook:
+  enabled: false
+  url: ""
+  timeout-millis: 3000
+  max-retries: 3
+  base-backoff-millis: 700
+  payload-template: '{"content":"Sign the Hack | &name& checked by &checker& (&reason&) | hacks=&hacks& | results=&results&"}'
+
+sqlite:
+  # File path under plugin data folder
+  file: signthehack.db

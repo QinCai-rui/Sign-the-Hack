@@ -1,0 +1,140 @@
+# Fully data-driven check definitions.
+# mode: METEOR | TRANSLATE | KEYBIND
+# signatures: regex/text patterns considered DETECTED in returned sign response.
+
+hacks:
+  meteor-client:
+    display-name: "Meteor Client"
+    key: "key.meteor-client.open-gui"
+    mode: METEOR
+    signatures:
+      - "meteor"
+      - "key\\.meteor-client\\..*"
+
+  liquidbounce:
+    display-name: "LiquidBounce"
+    key: "liquidbounce.module.killaura.name"
+    mode: TRANSLATE
+    signatures:
+      - "liquidbounce"
+      - "killaura"
+
+  freecam:
+    display-name: "Freecam"
+    key: "key.freecam.toggle"
+    mode: KEYBIND
+    signatures:
+      - "freecam"
+
+  wurst:
+    display-name: "Wurst Client (-1.21)"
+    key: "key.wurst.zoom"
+    mode: KEYBIND
+    signatures:
+      - "wurst"
+
+  xray-fabric:
+    display-name: "XRay (Fabric)"
+    key: "xray.config.toggle"
+    mode: KEYBIND
+    signatures:
+      - "xray"
+
+  chestesp:
+    display-name: "ChestESP"
+    key: "key.chestesp.toggle"
+    mode: KEYBIND
+    signatures:
+      - "chestesp"
+
+  killaura-fabric:
+    display-name: "KillAura (Fabric)"
+    key: "key.killaura"
+    mode: KEYBIND
+    signatures:
+      - "killaura"
+
+  autofish:
+    display-name: "AutoFish"
+    key: "key.autofish.open_gui"
+    mode: KEYBIND
+    signatures:
+      - "autofish"
+
+  lumina:
+    display-name: "Lumina"
+    key: "key.lumina.open_click_gui"
+    mode: KEYBIND
+    signatures:
+      - "lumina"
+
+  autoswitch:
+    display-name: "AutoSwitch"
+    key: "key.autoswitch.toggle"
+    mode: KEYBIND
+    signatures:
+      - "autoswitch"
+
+  bleachhack:
+    display-name: "BleachHack"
+    key: "bleachhack.module.killaura"
+    mode: TRANSLATE
+    signatures:
+      - "bleachhack"
+
+  aristois:
+    display-name: "Aristois"
+    key: "emc.module.killaura.name"
+    mode: TRANSLATE
+    signatures:
+      - "aristois"
+
+  coffee:
+    display-name: "Coffee Client"
+    key: "coffee.module.killaura.name"
+    mode: TRANSLATE
+    signatures:
+      - "coffee"
+
+  world-downloader:
+    display-name: "World Downloader"
+    key: "key.wdl.startStop"
+    mode: TRANSLATE
+    signatures:
+      - "wdl"
+      - "world downloader"
+
+  autoclicker-fabric:
+    display-name: "AutoClicker (Fabric)"
+    key: "autoclicker-fabric.hud.holding"
+    mode: TRANSLATE
+    signatures:
+      - "autoclicker"
+
+  antiafk:
+    display-name: "AntiAFK"
+    key: "key.antiafk.toggle"
+    mode: TRANSLATE
+    signatures:
+      - "antiafk"
+
+  auto-clicker-mc:
+    display-name: "Auto Clicker (p1k0chu)"
+    key: "key.auto-clicker_.toggle"
+    mode: KEYBIND
+    signatures:
+      - "auto-clicker"
+
+  extra-autoclicker-1:
+    display-name: "AutoClicker Signature A"
+    key: "key.autoclicker.toggle"
+    mode: KEYBIND
+    signatures:
+      - "autoclicker"
+
+  extra-autoclicker-2:
+    display-name: "AutoClicker Signature B"
+    key: "module.autoclicker.name"
+    mode: TRANSLATE
+    signatures:
+      - "autoclicker"
