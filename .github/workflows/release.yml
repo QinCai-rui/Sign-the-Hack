@@ -1,0 +1,59 @@
+name: Release
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+on:
+  push:
+    branches: ["main"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Build package
+        run: mvn -B -ntp test package
+
+      - name: Compute release version
+        id: version
+        shell: bash
+        run: |
+          DATE="$(date -u +%Y%m%d)"
+          git fetch --tags --force
+          LAST_SEQ="$(git tag --list "${DATE}.*" | sed -E "s/^${DATE}\.//" | sort -n | tail -1)"
+
+          if [[ -z "${LAST_SEQ}" ]]; then
+            NEXT_SEQ=1
+          else
+            NEXT_SEQ=$((LAST_SEQ + 1))
+          fi
+
+          VERSION="${DATE}.${NEXT_SEQ}"
+          echo "version=${VERSION}" >> "${GITHUB_OUTPUT}"
+          echo "Release version: ${VERSION}"
+
+      - name: Create GitHub release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          gh release create "${VERSION}" \
+            target/*.jar \
+            --title "${VERSION}" \
+            --generate-notes
