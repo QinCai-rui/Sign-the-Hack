@@ -19,7 +19,7 @@ import java.util.Map;
 
 public final class SqlMigrations {
     private static final Map<String, String> KNOWN_CHECKSUMS = Map.of(
-            "V1__init.sql", "5b2206599b487f557fe416f8a1b9b610004a2bc64c29d449570b2de996733fec"
+        "V1__init.sql", "a3f7409be4b1791feb57a59bb2b31dc2559d98201ea19b0e4eaed3f25585128b"
     );
 
     public void migrate(Connection connection) throws SQLException, IOException {
