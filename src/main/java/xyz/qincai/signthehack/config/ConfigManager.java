@@ -131,12 +131,13 @@ public final class ConfigManager {
             String display = item.getString("display-name", id);
             String key = item.getString("key", "");
             DetectionMode mode = DetectionMode.valueOf(item.getString("mode", "TRANSLATE").toUpperCase(Locale.ROOT));
+            String fallback = "\u27e6NO_" + id.toUpperCase(Locale.ROOT).replace('-', '_') + "\u27e7";
             List<String> signatures = new ArrayList<>(item.getStringList("signatures"));
             if (signatures.isEmpty()) {
                 signatures.add(key);
                 signatures.add(display);
             }
-            parsed.put(id.toLowerCase(Locale.ROOT), new CheckDefinition(id, display, key, mode, signatures));
+            parsed.put(id.toLowerCase(Locale.ROOT), new CheckDefinition(id, display, key, mode, fallback, signatures));
         }
         return parsed;
     }

@@ -7,6 +7,7 @@ public record CheckDefinition(
         String displayName,
         String key,
         DetectionMode mode,
+        String fallback,
         List<String> signatures
 ) {
 }

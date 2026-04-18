@@ -183,12 +183,8 @@ public final class ScanService {
     private Component buildProbeComponent(CheckDefinition check) {
         return switch (check.mode()) {
             case KEYBIND -> Component.keybind(check.key());
-            case METEOR, TRANSLATE -> Component.translatable(check.key(), fallbackFor(check));
+            case METEOR, TRANSLATE -> Component.translatable(check.key(), check.fallback());
         };
-    }
-
-    private String fallbackFor(CheckDefinition check) {
-        return "[NO_" + check.id().toUpperCase().replace('-', '_') + "]";
     }
 
     public void handleSignResponse(Player player, List<String> lines) {
@@ -202,10 +198,12 @@ public final class ScanService {
             context.timeoutTask = null;
         }
 
+        boolean exploitPreventer = lines.size() > 3 && "key.forward".equalsIgnoreCase(lines.get(3) == null ? "" : lines.get(3).strip());
+
         for (int i = 0; i < context.currentBatch.size(); i++) {
             CheckDefinition check = context.currentBatch.get(i);
             String response = i < lines.size() ? lines.get(i) : "";
-            CheckStatus status = evaluator.evaluate(check, response);
+            CheckStatus status = evaluator.evaluate(check, response, exploitPreventer);
             context.results.add(new CheckResult(check, status, "response=" + sanitize(response)));
         }
 
