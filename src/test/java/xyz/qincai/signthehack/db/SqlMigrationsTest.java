@@ -6,8 +6,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -29,9 +29,11 @@ class SqlMigrationsTest {
     }
 
     private boolean tableExists(Connection connection, String table) throws Exception {
-        try (Statement statement = connection.createStatement();
-             ResultSet rs = statement.executeQuery("SELECT name FROM sqlite_master WHERE type='table' AND name='" + table + "'")) {
-            return rs.next();
+        try (PreparedStatement statement = connection.prepareStatement("SELECT name FROM sqlite_master WHERE type='table' AND name=?")) {
+            statement.setString(1, table);
+            try (ResultSet rs = statement.executeQuery()) {
+                return rs.next();
+            }
         }
     }
 }

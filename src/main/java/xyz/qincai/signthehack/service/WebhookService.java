@@ -110,9 +110,35 @@ public final class WebhookService {
     private String replaceTokens(String template, Map<String, String> tokens) {
         String output = template;
         for (Map.Entry<String, String> entry : tokens.entrySet()) {
-            output = output.replace(entry.getKey(), entry.getValue().replace("\"", ""));
+            output = output.replace(entry.getKey(), escapeJson(entry.getValue()));
         }
         return output;
+    }
+
+    private String escapeJson(String value) {
+        if (value == null) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder(value.length() + 16);
+        for (char c : value.toCharArray()) {
+            switch (c) {
+                case '"' -> sb.append("\\\"");
+                case '\\' -> sb.append("\\\\");
+                case '\b' -> sb.append("\\b");
+                case '\f' -> sb.append("\\f");
+                case '\n' -> sb.append("\\n");
+                case '\r' -> sb.append("\\r");
+                case '\t' -> sb.append("\\t");
+                default -> {
+                    if (c < 0x20) {
+                        sb.append(String.format("\\u%04x", (int) c));
+                    } else {
+                        sb.append(c);
+                    }
+                }
+            }
+        }
+        return sb.toString();
     }
 
     public void shutdown() {
