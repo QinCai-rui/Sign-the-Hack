@@ -9,11 +9,15 @@ import xyz.qincai.signthehack.detection.DetectionEvaluator;
 import xyz.qincai.signthehack.detection.ScanReason;
 import xyz.qincai.signthehack.detection.ScanReport;
 import xyz.qincai.signthehack.util.MiniMessageMessenger;
+import xyz.qincai.signthehack.util.SignProbeTransport;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
+import org.bukkit.block.sign.Side;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -67,7 +71,8 @@ public final class ScanService {
             return report.scanId();
         }
 
-        ArrayDeque<List<CheckDefinition>> queue = batch(checks, configManager.appConfig().maxChecksPerSign());
+        int checksPerSign = Math.max(1, Math.min(3, configManager.appConfig().maxChecksPerSign()));
+        ArrayDeque<List<CheckDefinition>> queue = batch(checks, checksPerSign);
         ScanContext context = new ScanContext(UUID.randomUUID(), checker, target, reason, queue, new ArrayList<>());
         active.put(target.getUniqueId(), context);
         runNextBatch(context);
@@ -124,44 +129,71 @@ public final class ScanService {
         context.currentBatch = batch;
         context.currentPlacement = placement;
         context.timeoutTask = Bukkit.getScheduler().runTaskLater(plugin, () -> onTimeout(context), configManager.appConfig().probeTimeoutTicks());
-        context.target.openSign((Sign) placement.signBlock().getState());
+        SignProbeTransport.setAllowedEditor(placement.signBlock().getLocation(), context.target.getUniqueId(), plugin);
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            if (!active.containsKey(context.target.getUniqueId())) {
+                return;
+            }
+            SignProbeTransport.sendBlockEntityUpdate(context.target, placement.signBlock().getLocation(), plugin);
+            Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                if (!active.containsKey(context.target.getUniqueId())) {
+                    return;
+                }
+                SignProbeTransport.sendOpenSignEditor(context.target, placement.signBlock().getLocation(), plugin);
+                context.target.sendBlockChange(placement.signBlock().getLocation(), Material.AIR.createBlockData());
+            }, 1L);
+        });
     }
 
     private ProbePlacement placeProbeSign(Player target, List<CheckDefinition> batch) {
-        Location location = target.getLocation().clone().add(0, 2, 0).getBlock().getLocation();
-        Block signBlock = location.getBlock();
-        Block supportBlock = location.clone().add(0, -1, 0).getBlock();
-
-        Material originalSignType = signBlock.getType();
-        var originalSignData = signBlock.getBlockData().clone();
-        Material originalSupportType = supportBlock.getType();
-        var originalSupportData = supportBlock.getBlockData().clone();
-
-        supportBlock.setType(Material.BARRIER, false);
-        signBlock.setType(Material.OAK_SIGN, false);
-
-        if (!(signBlock.getState() instanceof Sign sign)) {
-            signBlock.setType(originalSignType, false);
-            signBlock.setBlockData(originalSignData, false);
-            supportBlock.setType(originalSupportType, false);
-            supportBlock.setBlockData(originalSupportData, false);
+        Location location = SignProbeTransport.findAirProbeLocation(target);
+        if (location == null) {
             return null;
         }
 
-        sign.setLine(0, "[STH]");
-        for (int i = 0; i < batch.size(); i++) {
-            sign.setLine(i + 1, batch.get(i).key());
+        Block signBlock = location.getBlock();
+        Block supportBlock = location.clone().add(0, -1, 0).getBlock();
+
+        BlockState originalSignState = signBlock.getState();
+        Location supportLocation = supportBlock.getLocation();
+        boolean barrierPlaced = supportBlock.getType().isAir();
+        if (barrierPlaced) {
+            supportBlock.setType(Material.BARRIER, false);
         }
+
+        signBlock.setType(Material.OAK_SIGN, false);
+
+        if (!(signBlock.getState() instanceof Sign sign)) {
+            originalSignState.update(true, false);
+            if (barrierPlaced) {
+                supportBlock.setType(Material.AIR, false);
+            }
+            return null;
+        }
+
+        var front = sign.getSide(Side.FRONT);
+        for (int i = 0; i < 3; i++) {
+            front.line(i, i < batch.size() ? buildProbeComponent(batch.get(i)) : Component.empty());
+        }
+        front.line(3, Component.keybind("key.forward"));
         sign.update(true, false);
-        return new ProbePlacement(signBlock, supportBlock, originalSignType, originalSignData, originalSupportType, originalSupportData);
+        return new ProbePlacement(signBlock, originalSignState, barrierPlaced, supportLocation);
     }
 
-    public void handleSignResponse(Player player, Location signLocation, List<String> lines) {
+    private Component buildProbeComponent(CheckDefinition check) {
+        return switch (check.mode()) {
+            case KEYBIND -> Component.keybind(check.key());
+            case METEOR, TRANSLATE -> Component.translatable(check.key(), fallbackFor(check));
+        };
+    }
+
+    private String fallbackFor(CheckDefinition check) {
+        return "[NO_" + check.id().toUpperCase().replace('-', '_') + "]";
+    }
+
+    public void handleSignResponse(Player player, List<String> lines) {
         ScanContext context = active.get(player.getUniqueId());
         if (context == null || context.currentPlacement == null) {
-            return;
-        }
-        if (!sameBlock(context.currentPlacement.signBlock().getLocation(), signLocation)) {
             return;
         }
 
@@ -172,7 +204,7 @@ public final class ScanService {
 
         for (int i = 0; i < context.currentBatch.size(); i++) {
             CheckDefinition check = context.currentBatch.get(i);
-            String response = (i + 1) < lines.size() ? lines.get(i + 1) : "";
+            String response = i < lines.size() ? lines.get(i) : "";
             CheckStatus status = evaluator.evaluate(check, response);
             context.results.add(new CheckResult(check, status, "response=" + sanitize(response)));
         }
@@ -208,11 +240,8 @@ public final class ScanService {
         completion.accept(report, context.checker);
     }
 
-    private boolean sameBlock(Location a, Location b) {
-        return a.getWorld() != null && a.getWorld().equals(b.getWorld())
-                && a.getBlockX() == b.getBlockX()
-                && a.getBlockY() == b.getBlockY()
-                && a.getBlockZ() == b.getBlockZ();
+    public boolean isChecking(UUID playerId) {
+        return active.containsKey(playerId);
     }
 
     private String sanitize(String value) {
@@ -221,10 +250,20 @@ public final class ScanService {
     }
 
     private void cleanup(ProbePlacement placement) {
-        placement.signBlock.setType(placement.originalSignType, false);
-        placement.signBlock.setBlockData(placement.originalSignData, false);
-        placement.supportBlock.setType(placement.originalSupportType, false);
-        placement.supportBlock.setBlockData(placement.originalSupportData, false);
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            try {
+                placement.originalSignState.update(true, false);
+            } catch (Exception exception) {
+                plugin.getLogger().warning("Failed to restore probe sign block: " + exception.getMessage());
+            }
+            if (placement.barrierPlaced && placement.supportLocation != null) {
+                try {
+                    placement.supportLocation.getBlock().setType(Material.AIR, false);
+                } catch (Exception exception) {
+                    plugin.getLogger().warning("Failed to restore probe support block: " + exception.getMessage());
+                }
+            }
+        });
     }
 
     public synchronized void cancelAll() {
@@ -263,11 +302,9 @@ public final class ScanService {
 
     private record ProbePlacement(
             Block signBlock,
-            Block supportBlock,
-            Material originalSignType,
-            org.bukkit.block.data.BlockData originalSignData,
-            Material originalSupportType,
-            org.bukkit.block.data.BlockData originalSupportData
+            BlockState originalSignState,
+            boolean barrierPlaced,
+            Location supportLocation
     ) {
     }
 }
