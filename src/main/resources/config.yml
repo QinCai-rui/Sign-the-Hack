@@ -8,9 +8,9 @@ probe:
   # Max checks packed in one probe sign (1-3 recommended)
   max-checks-per-sign: 3
   # Delay between sequential probe signs in ticks
-  delay-between-signs-ticks: 12
+  delay-between-signs-ticks: 5
   # Client response timeout in ticks. Timeout is classified as PROTECTED.
-  timeout-ticks: 60
+  timeout-ticks: 100
   # Hide probe signs/barriers from player view using client-side fake blocks.
   invisible-signs: true
 
@@ -20,14 +20,34 @@ check-sets:
     - meteor-client
     - liquidbounce
     - freecam
+    - wurst
     - xray-fabric
     - chestesp
     - killaura-fabric
+    - autofish
+    - lumina
+    - autoswitch
+    - bleachhack
+    - aristois
+    - coffee
+    - world-downloader
+    - autoclicker-fabric
+    - antiafk
+    - auto-clicker-mc
+    - extra-autoclicker-1
+    - extra-autoclicker-2
   # Used by automatic join scan
   join:
     - meteor-client
     - freecam
     - wurst
+    - chestesp
+    - lumina
+    - autoswitch
+    - bleachhack
+    - aristois
+    - coffee
+    - world-downloader
     - antiafk
   # Used when anticheat-trigger scan occurs
   anticheat:
@@ -39,12 +59,12 @@ check-sets:
 auto:
   join:
     enabled: true
-    delay-ticks: 80
+    delay-ticks: 20
     first-join-only: false
 
 cooldown:
   manual-seconds: 15
-  join-seconds: 180
+  join-seconds: 30
   anticheat-seconds: 60
 
 bedrock-skip:
@@ -56,13 +76,13 @@ bedrock-skip:
 actions:
   # Commands run by console when any DETECTED result exists.
   on-detected:
-    - "kick <name> Unfair client detected: <results>"
+    - "tempban <name> 30sec Unfair client/mod detected: <results>"
   # Commands run by console when no DETECTED but any PROTECTED exists.
   on-protected:
-    - "tell <name> Please disable translation/keybind protection mods. Triggering checks: <results>"
+    - "kick <name> Please disable translation/keybind protection mods. However, this might be also due to server/client lag if you do not know what this means"
   # Commands run by console when scan is clean (NOT_DETECTED/SKIPPED only).
   on-clean:
-    - "tell <name> Scan clean."
+    - ""
   # Reason shown to player when action hooks execute.
   # Must include exact check id|display name|status in <results>.
   reason-template: "<red>Sign the Hack action triggered.</red> <gray>Checks:</gray> <white><results></white>"
