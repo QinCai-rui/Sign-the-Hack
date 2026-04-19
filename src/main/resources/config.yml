@@ -88,6 +88,7 @@ bedrock-skip:
 
 actions:
   # Commands run by console when any DETECTED result exists.
+  # NOTE: if /tempban is missing, the default tempban command falls back to /kick.
   on-detected:
     - "tempban <name> 30sec Unfair client/mod detected: <results>"
   # Commands run by console when no DETECTED but any PROTECTED exists.

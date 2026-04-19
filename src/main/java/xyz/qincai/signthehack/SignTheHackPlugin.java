@@ -22,9 +22,10 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.nio.file.Path;
+import java.lang.reflect.Method;
+import java.util.Locale;
 import java.util.List;
 import java.util.Map;
-import java.util.Locale;
 
 public final class SignTheHackPlugin extends JavaPlugin {
     private ConfigManager configManager;
@@ -38,12 +39,17 @@ public final class SignTheHackPlugin extends JavaPlugin {
     private ScanService scanService;
     private AnticheatIntegrationService anticheatIntegrationService;
     private UpdateCheckerService updateCheckerService;
+    private boolean tempbanAvailable;
 
     @Override
     public void onEnable() {
         this.messenger = new MiniMessageMessenger();
         this.configManager = new ConfigManager(this);
         this.configManager.load();
+        this.tempbanAvailable = hasCommand("tempban");
+        if (!tempbanAvailable) {
+            getLogger().warning("Command /tempban was not found. DETECTED actions will fall back to /kick.");
+        }
         this.messageService = new MessageService(configManager);
 
         this.cooldownService = new CooldownService();
@@ -100,7 +106,9 @@ public final class SignTheHackPlugin extends JavaPlugin {
         List<String> actions;
         if (report.hasDetected()) {
             triggeringChecks = report.results().stream().filter(r -> r.status() == CheckStatus.DETECTED).toList();
-            actions = configManager.appConfig().actions().onDetected();
+            actions = configManager.appConfig().actions().onDetected().stream()
+                    .map(this::fallbackTempbanToKick)
+                    .toList();
             runDetectedBroadcast(report, triggeringChecks);
         } else if (report.hasProtected()) {
             triggeringChecks = report.results().stream().filter(r -> r.status() == CheckStatus.PROTECTED).toList();
@@ -159,6 +167,46 @@ public final class SignTheHackPlugin extends JavaPlugin {
 
         if (!command.isBlank()) {
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
+        }
+    }
+
+    private String fallbackTempbanToKick(String command) {
+        if (tempbanAvailable || command == null) {
+            return command;
+        }
+        String trimmed = command.trim();
+        if (!trimmed.toLowerCase(Locale.ROOT).startsWith("tempban ")) {
+            return command;
+        }
+
+        String[] parts = trimmed.split("\\s+");
+        if (parts.length < 3) {
+            return trimmed;
+        }
+
+        String target = parts[1];
+        StringBuilder reason = new StringBuilder();
+        for (int i = 3; i < parts.length; i++) {
+            if (reason.length() > 0) {
+                reason.append(' ');
+            }
+            reason.append(parts[i]);
+        }
+        if (reason.isEmpty()) {
+            return "kick " + target;
+        }
+        return "kick " + target + " " + reason;
+    }
+
+    private boolean hasCommand(String commandName) {
+        try {
+            Object commandMap = Bukkit.getServer().getClass().getMethod("getCommandMap").invoke(Bukkit.getServer());
+            Method getCommand = commandMap.getClass().getMethod("getCommand", String.class);
+            Object command = getCommand.invoke(commandMap, commandName);
+            return command != null;
+        } catch (ReflectiveOperationException ex) {
+            getLogger().warning("Unable to verify command /" + commandName + ": " + ex.getMessage());
+            return false;
         }
     }
 }

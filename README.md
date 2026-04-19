@@ -12,6 +12,7 @@ The plugin can then classify the client's status as DETECTED, PROTECTED, NOT_DET
 
 - Java 21
 - Paper server (1.21 API target)
+- Optional: a `/tempban` command from EssentialsX or a similar plugin. If it is missing, detected actions fall back to `/kick`.
 - Optional: PlaceholderAPI, GrimAC, Vulcan, Spartan
 
 ## Installation
