@@ -160,8 +160,7 @@ public final class UpdateCheckerService {
                 return;
             }
 
-            int cmp = compareVersions(currentVersion, latestVersion);
-            boolean updateAvailable = cmp < 0;
+            boolean updateAvailable = !currentVersion.equalsIgnoreCase(latestVersion);
             state = new State(updateAvailable, currentVersion, latestVersion, downloadUrl, null);
 
             if (updateAvailable) {
@@ -187,36 +186,6 @@ public final class UpdateCheckerService {
         return matcher.find() ? matcher.group(1) : "";
     }
 
-    private static int compareVersions(String left, String right) {
-        int[] l = parseVersionTriplet(left);
-        int[] r = parseVersionTriplet(right);
-        for (int i = 0; i < 3; i++) {
-            int cmp = Integer.compare(l[i], r[i]);
-            if (cmp != 0) {
-                return cmp;
-            }
-        }
-        return 0;
-    }
-
-    private static int[] parseVersionTriplet(String value) {
-        String cleaned = normalizeVersion(value).replace('-', '.').replace('_', '.');
-        String[] parts = cleaned.split("\\.");
-        int[] result = new int[]{0, 0, 0};
-        int idx = 0;
-        for (String part : parts) {
-            if (idx >= 3) {
-                break;
-            }
-            String digits = part.replaceAll("[^0-9]", "");
-            if (digits.isBlank()) {
-                continue;
-            }
-            result[idx++] = Integer.parseInt(digits);
-        }
-        return result;
-    }
-
     private static String normalizeVersion(String version) {
         if (version == null) {
             return "";
@@ -224,10 +193,6 @@ public final class UpdateCheckerService {
         String normalized = version.trim();
         if (normalized.startsWith("v") || normalized.startsWith("V")) {
             normalized = normalized.substring(1);
-        }
-        int dash = normalized.indexOf('-');
-        if (dash > 0) {
-            normalized = normalized.substring(0, dash);
         }
         return normalized;
     }

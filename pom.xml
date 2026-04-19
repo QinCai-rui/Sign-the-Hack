@@ -4,10 +4,11 @@
 
     <groupId>xyz.qincai</groupId>
     <artifactId>sign-the-hack</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>${revision}</version>
     <name>Sign the Hack</name>
     <description>Paper anti-cheat utility using sign translation probing</description>
     <properties>
+        <revision>0.0.0-UNKNOWN</revision>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

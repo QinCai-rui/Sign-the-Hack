@@ -31,26 +31,15 @@ jobs:
         id: version
         shell: bash
         run: |
-          DATE="$(date -u +%Y%m%d)"
-          git fetch --tags --force
-          LAST_SEQ="$(git tag --list "${DATE}.*" | sed -E "s/^${DATE}\.([0-9]+).*$/\1/" | sort -n | tail -1)"
-
-          if [[ -z "${LAST_SEQ}" ]]; then
-            NEXT_SEQ=1
-          else
-            NEXT_SEQ=$((LAST_SEQ + 1))
-          fi
-
+          DATE="$(date -u +%y.%m.%d)"
           SHORT_SHA="${GITHUB_SHA::7}"
-          VERSION="${DATE}.${NEXT_SEQ}-SNAPSHOT-${SHORT_SHA}"
-
-          mvn -B -ntp versions:set -DnewVersion="${VERSION}" -DgenerateBackupPoms=false
+          VERSION="${DATE}-dev.${SHORT_SHA}"
 
           echo "version=${VERSION}" >> "${GITHUB_OUTPUT}"
           echo "Build version: ${VERSION}"
 
       - name: Build package
-        run: mvn -B -ntp test package
+        run: mvn -B -ntp -Drevision="${{ steps.version.outputs.version }}" test package
 
       - name: Create GitHub release
         env:
