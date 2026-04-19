@@ -201,7 +201,7 @@ public final class UpdateCheckerService {
 
     private static int[] parseVersionTriplet(String value) {
         String cleaned = normalizeVersion(value).replace('-', '.').replace('_', '.');
-        String[] parts = cleaned.split("\\\\.");
+        String[] parts = cleaned.split("\\.");
         int[] result = new int[]{0, 0, 0};
         int idx = 0;
         for (String part : parts) {
