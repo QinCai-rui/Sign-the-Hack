@@ -4,6 +4,7 @@ import xyz.qincai.signthehack.config.ConfigManager;
 import xyz.qincai.signthehack.detection.ScanReason;
 import xyz.qincai.signthehack.service.CooldownService;
 import xyz.qincai.signthehack.service.ScanService;
+import xyz.qincai.signthehack.service.UpdateCheckerService;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -18,16 +19,21 @@ public final class JoinListener implements Listener {
     private final ConfigManager configManager;
     private final ScanService scanService;
     private final CooldownService cooldownService;
+    private final UpdateCheckerService updateCheckerService;
 
-    public JoinListener(JavaPlugin plugin, ConfigManager configManager, ScanService scanService, CooldownService cooldownService) {
+    public JoinListener(JavaPlugin plugin, ConfigManager configManager, ScanService scanService, CooldownService cooldownService,
+                        UpdateCheckerService updateCheckerService) {
         this.plugin = plugin;
         this.configManager = configManager;
         this.scanService = scanService;
         this.cooldownService = cooldownService;
+        this.updateCheckerService = updateCheckerService;
     }
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
+        updateCheckerService.notifyIfUpdateAvailable(event.getPlayer());
+
         var cfg = configManager.appConfig();
         if (!cfg.auto().enabled()) {
             return;

@@ -24,6 +24,9 @@ permissions:
   signthehack.alerts:
     description: Allow toggling and receiving alerts
     default: op
+  signthehack.update:
+    description: Receive plugin update notifications
+    default: op
   signthehack.*:
     description: Full access to Sign the Hack
     default: op
@@ -31,3 +34,4 @@ permissions:
       signthehack.check: true
       signthehack.reload: true
       signthehack.alerts: true
+      signthehack.update: true

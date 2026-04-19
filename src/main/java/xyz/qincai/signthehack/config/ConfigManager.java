@@ -70,6 +70,15 @@ public final class ConfigManager {
     }
 
     private AppConfig parseAppConfig(FileConfiguration cfg) {
+        AppConfig.UpdateCheckerConfig updateChecker = new AppConfig.UpdateCheckerConfig(
+            cfg.getBoolean("update-checker.enabled", true),
+            cfg.getString("update-checker.api-url", "https://api.github.com/repos/QinCai-rui/Sign-the-Hack/releases/latest"),
+            cfg.getInt("update-checker.timeout-millis", 5000),
+            cfg.getLong("update-checker.interval-minutes", 360L),
+            cfg.getBoolean("update-checker.notify-on-join", true),
+            cfg.getString("update-checker.notify-permission", "signthehack.update"),
+            cfg.getBoolean("update-checker.notify-ops-without-permission", true)
+        );
         AppConfig.AutoConfig auto = new AppConfig.AutoConfig(
                 cfg.getBoolean("auto.join.enabled", true),
                 cfg.getLong("auto.join.delay-ticks", 60L),
@@ -106,6 +115,7 @@ public final class ConfigManager {
         return new AppConfig(
                 cfg.getBoolean("debug", false),
                 cfg.getString("locale", "en"),
+            updateChecker,
                 cfg.getInt("probe.max-checks-per-sign", 3),
                 cfg.getLong("probe.delay-between-signs-ticks", 10L),
                 cfg.getLong("probe.timeout-ticks", 60L),
@@ -149,6 +159,12 @@ public final class ConfigManager {
     }
 
     private void validate() {
+        if (appConfig.updateChecker().timeoutMillis() < 1000) {
+            throw new IllegalStateException("update-checker.timeout-millis must be >= 1000");
+        }
+        if (appConfig.updateChecker().intervalMinutes() < 0L) {
+            throw new IllegalStateException("update-checker.interval-minutes must be >= 0");
+        }
         if (appConfig.maxChecksPerSign() < 1 || appConfig.maxChecksPerSign() > 3) {
             throw new IllegalStateException("probe.max-checks-per-sign must be between 1 and 3");
         }

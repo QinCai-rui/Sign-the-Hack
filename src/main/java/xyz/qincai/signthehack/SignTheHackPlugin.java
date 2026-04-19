@@ -14,6 +14,7 @@ import xyz.qincai.signthehack.service.CooldownService;
 import xyz.qincai.signthehack.service.MessageService;
 import xyz.qincai.signthehack.service.PersistenceService;
 import xyz.qincai.signthehack.service.ScanService;
+import xyz.qincai.signthehack.service.UpdateCheckerService;
 import xyz.qincai.signthehack.service.WebhookService;
 import xyz.qincai.signthehack.util.MiniMessageMessenger;
 import org.bukkit.Bukkit;
@@ -36,6 +37,7 @@ public final class SignTheHackPlugin extends JavaPlugin {
     private ActionService actionService;
     private ScanService scanService;
     private AnticheatIntegrationService anticheatIntegrationService;
+    private UpdateCheckerService updateCheckerService;
 
     @Override
     public void onEnable() {
@@ -52,6 +54,7 @@ public final class SignTheHackPlugin extends JavaPlugin {
         this.actionService = new ActionService(this, configManager, messenger);
         this.scanService = new ScanService(this, configManager, messageService, messenger, this::onScanComplete);
         this.anticheatIntegrationService = new AnticheatIntegrationService(this, scanService, cooldownService, configManager);
+        this.updateCheckerService = new UpdateCheckerService(this, configManager, messageService, messenger);
 
         var command = new SignTheHackCommand(this, scanService, alertService, cooldownService, messenger, messageService, anticheatIntegrationService);
         var pluginCommand = getCommand("signthehack");
@@ -62,8 +65,9 @@ public final class SignTheHackPlugin extends JavaPlugin {
         pluginCommand.setTabCompleter(command);
 
         Bukkit.getPluginManager().registerEvents(new SignResponseListener(scanService), this);
-        Bukkit.getPluginManager().registerEvents(new JoinListener(this, configManager, scanService, cooldownService), this);
+        Bukkit.getPluginManager().registerEvents(new JoinListener(this, configManager, scanService, cooldownService, updateCheckerService), this);
         anticheatIntegrationService.bind();
+        updateCheckerService.start();
 
         getLogger().info("Sign the Hack enabled.");
     }
@@ -75,6 +79,9 @@ public final class SignTheHackPlugin extends JavaPlugin {
         }
         if (webhookService != null) {
             webhookService.shutdown();
+        }
+        if (updateCheckerService != null) {
+            updateCheckerService.stop();
         }
         if (persistenceService != null) {
             persistenceService.shutdown();
@@ -111,6 +118,7 @@ public final class SignTheHackPlugin extends JavaPlugin {
     public void reloadAll() {
         configManager.load();
         webhookService.updateConfig(configManager.appConfig().webhook());
+        updateCheckerService.reload();
     }
 
     public ConfigManager getConfigManager() {
@@ -122,7 +130,8 @@ public final class SignTheHackPlugin extends JavaPlugin {
                 "checks", String.valueOf(configManager.checks().size()),
                 "locale", configManager.appConfig().locale(),
                 "webhookEnabled", String.valueOf(configManager.appConfig().webhook().enabled()),
-                "debug", String.valueOf(configManager.appConfig().debug())
+            "debug", String.valueOf(configManager.appConfig().debug()),
+            "updateChecker", updateCheckerService == null ? "disabled" : updateCheckerService.statusSummary()
         );
     }
 

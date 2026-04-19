@@ -6,6 +6,7 @@ import java.util.Map;
 public record AppConfig(
         boolean debug,
         String locale,
+        UpdateCheckerConfig updateChecker,
         int maxChecksPerSign,
         long delayBetweenSignsTicks,
         long probeTimeoutTicks,
@@ -21,6 +22,17 @@ public record AppConfig(
         WebhookConfig webhook,
         String sqliteFile
 ) {
+        public record UpdateCheckerConfig(
+                        boolean enabled,
+                        String apiUrl,
+                        int timeoutMillis,
+                        long intervalMinutes,
+                        boolean notifyOnJoin,
+                        String notifyPermission,
+                        boolean notifyOpsWithoutPermission
+        ) {
+        }
+
     public record AutoConfig(boolean enabled, long joinDelayTicks, boolean firstJoinOnly) {
     }
 

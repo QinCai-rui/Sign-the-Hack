@@ -16,3 +16,4 @@ alert-header: "<gold>[Sign the Hack]</gold> <gray><name> checked by <checker> re
 alert-line: "<gray>- </gray><white><check></white> <aqua><status></aqua>"
 probe-already-running: "<yellow>A scan is already running for this player.</yellow>"
 no-checks-selected: "<yellow>No checks selected.</yellow>"
+update-available-player: "<gold>[Sign the Hack]</gold> <yellow>Update available: <white><current></white> -> <white><latest></white>. <gray><url></gray></yellow>"
