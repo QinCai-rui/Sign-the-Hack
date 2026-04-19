@@ -1,16 +1,12 @@
 # Sign the Hack
 
-Sign the Hack is a server-side Paper anti-cheat utility plugin that probes client translation/keybind resolution using temporary sign interactions (using MC-265322) to detect certain mod signatures.
+Sign the Hack is a server-side Paper anti-cheat utility plugin that probes client translation/keybind resolution using temporary sign interactions (using [MC-265322](https://bugs.mojang.com/browse/MC/issues/MC-265322)) to detect certain mod signatures.
 
 ## How it works
 
-The plugin places temporary signs with translation/keybind payload keys and opens the sign editor to force client-side resolution. Different clients can resolve or expose keys differently:
+When a player is probed, the plugin spawns temporary signs with custom text that reference specific mod signatures. Legitimate clients will resolve the text and return it to the server, however clients with certain mods will fail to resolve it correctly. 
 
-- vanilla-safe resolution patterns -> usually `NOT_DETECTED`
-- mod-specific translation/keybind signatures -> `DETECTED`
-- blocked/malformed/missing responses before timeout -> `PROTECTED`
-
-`PROTECTED` is intentionally **not** treated as clean.
+The plugin can then classify the client's status as DETECTED, PROTECTED, NOT_DETECTED, or SKIPPED for each check.
 
 ## Requirements
 
