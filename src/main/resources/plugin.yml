@@ -1,5 +1,5 @@
 name: SignTheHack
-version: 1.0.0-SNAPSHOT
+version: ${project.version}
 main: xyz.qincai.signthehack.SignTheHackPlugin
 api-version: '1.21'
 authors: [QinCai-rui]

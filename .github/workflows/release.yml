@@ -27,16 +27,13 @@ jobs:
           java-version: '21'
           cache: maven
 
-      - name: Build package
-        run: mvn -B -ntp test package
-
-      - name: Compute release version
+      - name: Stamp build version
         id: version
         shell: bash
         run: |
           DATE="$(date -u +%Y%m%d)"
           git fetch --tags --force
-          LAST_SEQ="$(git tag --list "${DATE}.*" | sed -E "s/^${DATE}\.//" | sort -n | tail -1)"
+          LAST_SEQ="$(git tag --list "${DATE}.*" | sed -E "s/^${DATE}\.([0-9]+).*$/\1/" | sort -n | tail -1)"
 
           if [[ -z "${LAST_SEQ}" ]]; then
             NEXT_SEQ=1
@@ -44,9 +41,16 @@ jobs:
             NEXT_SEQ=$((LAST_SEQ + 1))
           fi
 
-          VERSION="${DATE}.${NEXT_SEQ}"
+          SHORT_SHA="${GITHUB_SHA::7}"
+          VERSION="${DATE}.${NEXT_SEQ}-SNAPSHOT-${SHORT_SHA}"
+
+          mvn -B -ntp versions:set -DnewVersion="${VERSION}" -DgenerateBackupPoms=false
+
           echo "version=${VERSION}" >> "${GITHUB_OUTPUT}"
-          echo "Release version: ${VERSION}"
+          echo "Build version: ${VERSION}"
+
+      - name: Build package
+        run: mvn -B -ntp test package
 
       - name: Create GitHub release
         env:
