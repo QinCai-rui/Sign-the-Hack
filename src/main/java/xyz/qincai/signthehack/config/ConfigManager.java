@@ -90,6 +90,10 @@ public final class ConfigManager {
                 cfg.getStringList("actions.on-clean"),
                 cfg.getString("actions.reason-template", "<red>Sign the Hack result: <results>")
         );
+        AppConfig.DetectedBroadcastConfig detectedBroadcast = new AppConfig.DetectedBroadcastConfig(
+            cfg.getBoolean("detected-broadcast.enabled", false),
+            cfg.getString("detected-broadcast.command", "say <name> has been temporarily banned for using <hacks>. Be good kids")
+        );
         AppConfig.WebhookConfig webhook = new AppConfig.WebhookConfig(
                 cfg.getBoolean("webhook.enabled", false),
                 cfg.getString("webhook.url", ""),
@@ -113,6 +117,7 @@ public final class ConfigManager {
                 cooldown,
                 bedrockSkip,
                 actions,
+                detectedBroadcast,
                 webhook,
                 cfg.getString("sqlite.file", "signthehack.db")
         );

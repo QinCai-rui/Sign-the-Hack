@@ -17,6 +17,7 @@ public record AppConfig(
         CooldownConfig cooldown,
         BedrockSkipConfig bedrockSkip,
         ActionsConfig actions,
+        DetectedBroadcastConfig detectedBroadcast,
         WebhookConfig webhook,
         String sqliteFile
 ) {
@@ -34,6 +35,12 @@ public record AppConfig(
             List<String> onProtected,
             List<String> onClean,
             String reasonTemplate
+    ) {
+    }
+
+    public record DetectedBroadcastConfig(
+            boolean enabled,
+            String command
     ) {
     }
 

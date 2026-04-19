@@ -86,6 +86,11 @@ actions:
   # Reason shown to player when action hooks execute.
   # Must include exact check id|display name|status in <results>.
   reason-template: "<red>Sign the Hack action triggered.</red> <gray>Checks:</gray> <white><results></white>"
+  detected-broadcast:
+    # If true, executes the command below from console whenever DETECTED checks exist.
+    enabled: true
+    # Placeholders: <name>, <checker>, <reason>, <hacks>, <results>
+    command: "say <name> has been temporarily banned for using <hacks>. Be good kids"
 
 webhook:
   enabled: false

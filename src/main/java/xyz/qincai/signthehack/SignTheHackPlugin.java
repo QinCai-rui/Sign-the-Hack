@@ -23,6 +23,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+import java.util.Locale;
 
 public final class SignTheHackPlugin extends JavaPlugin {
     private ConfigManager configManager;
@@ -93,6 +94,7 @@ public final class SignTheHackPlugin extends JavaPlugin {
         if (report.hasDetected()) {
             triggeringChecks = report.results().stream().filter(r -> r.status() == CheckStatus.DETECTED).toList();
             actions = configManager.appConfig().actions().onDetected();
+            runDetectedBroadcast(report, triggeringChecks);
         } else if (report.hasProtected()) {
             triggeringChecks = report.results().stream().filter(r -> r.status() == CheckStatus.PROTECTED).toList();
             actions = configManager.appConfig().actions().onProtected();
@@ -122,5 +124,32 @@ public final class SignTheHackPlugin extends JavaPlugin {
                 "webhookEnabled", String.valueOf(configManager.appConfig().webhook().enabled()),
                 "debug", String.valueOf(configManager.appConfig().debug())
         );
+    }
+
+    private void runDetectedBroadcast(ScanReport report, List<CheckResult> triggeringChecks) {
+        var cfg = configManager.appConfig().detectedBroadcast();
+        if (!cfg.enabled()) {
+            return;
+        }
+
+        String hacks = triggeringChecks.stream()
+                .map(result -> result.check().displayName())
+                .reduce((a, b) -> a + "," + b)
+                .orElse("unknown");
+        String results = triggeringChecks.stream()
+                .map(result -> result.check().id().toLowerCase(Locale.ROOT) + "|" + result.check().displayName() + "|" + result.status().name())
+                .reduce((a, b) -> a + "; " + b)
+                .orElse("none");
+
+        String command = cfg.command()
+                .replace("<name>", report.targetName())
+                .replace("<checker>", report.checkerName())
+                .replace("<reason>", report.reason().key())
+                .replace("<hacks>", hacks)
+                .replace("<results>", results);
+
+        if (!command.isBlank()) {
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command);
+        }
     }
 }
