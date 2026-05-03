@@ -33,7 +33,7 @@ jobs:
         run: |
           DATE="$(date -u +%y.%m.%d)"
           SHORT_SHA="${GITHUB_SHA::7}"
-          VERSION="${DATE}-dev.${SHORT_SHA}"
+          VERSION="${DATE}-dev.${GITHUB_RUN_NUMBER}.${SHORT_SHA}"
 
           echo "version=${VERSION}" >> "${GITHUB_OUTPUT}"
           echo "Build version: ${VERSION}"
