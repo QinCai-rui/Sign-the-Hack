@@ -24,6 +24,7 @@ public record AppConfig(
 ) {
         public record UpdateCheckerConfig(
                         boolean enabled,
+                        boolean autoDownload,
                         String apiUrl,
                         int timeoutMillis,
                         long intervalMinutes,

@@ -2,6 +2,7 @@ package xyz.qincai.signthehack.config;
 
 import xyz.qincai.signthehack.detection.CheckDefinition;
 import xyz.qincai.signthehack.detection.DetectionMode;
+import xyz.qincai.signthehack.util.ConfigUpdater;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -38,6 +39,18 @@ public final class ConfigManager {
         saveResourceIfAbsent("messages/pt.yml");
         saveResourceIfAbsent("messages/ru.yml");
 
+        // Update configurations
+        try {
+            ConfigUpdater.update(plugin, "config.yml", new File(plugin.getDataFolder(), "config.yml"));
+            ConfigUpdater.update(plugin, "checks.yml", new File(plugin.getDataFolder(), "checks.yml"));
+            String[] messageFiles = {"en.yml", "it.yml", "de.yml", "es.yml", "fr.yml", "pt.yml", "ru.yml"};
+            for (String file : messageFiles) {
+                ConfigUpdater.update(plugin, "messages/" + file, new File(plugin.getDataFolder(), "messages/" + file));
+            }
+        } catch (java.io.IOException e) {
+            plugin.getLogger().warning("Failed to update config files: " + e.getMessage());
+        }
+
         plugin.reloadConfig();
         appConfig = parseAppConfig(plugin.getConfig());
         checks = parseChecks(YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), "checks.yml")));
@@ -72,6 +85,7 @@ public final class ConfigManager {
     private AppConfig parseAppConfig(FileConfiguration cfg) {
         AppConfig.UpdateCheckerConfig updateChecker = new AppConfig.UpdateCheckerConfig(
             cfg.getBoolean("update-checker.enabled", true),
+            cfg.getBoolean("update-checker.auto-download", true),
             cfg.getString("update-checker.api-url", "https://api.github.com/repos/QinCai-rui/Sign-the-Hack/releases/latest"),
             cfg.getInt("update-checker.timeout-millis", 5000),
             cfg.getLong("update-checker.interval-minutes", 360L),

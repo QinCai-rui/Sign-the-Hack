@@ -8,11 +8,13 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Map;
 import java.util.Set;
@@ -24,6 +26,7 @@ import java.util.regex.Pattern;
 public final class UpdateCheckerService {
     private static final Pattern TAG_NAME_PATTERN = Pattern.compile("\\\"tag_name\\\"\\s*:\\s*\\\"([^\\\"]+)\\\"");
     private static final Pattern HTML_URL_PATTERN = Pattern.compile("\\\"html_url\\\"\\s*:\\s*\\\"([^\\\"]+)\\\"");
+    private static final Pattern ASSET_DOWNLOAD_URL_PATTERN = Pattern.compile("\\\"browser_download_url\\\"\\s*:\\s*\\\"([^\\\"]+\\.jar)\\\"");
 
     private final JavaPlugin plugin;
     private final ConfigManager configManager;
@@ -166,6 +169,15 @@ public final class UpdateCheckerService {
             if (updateAvailable) {
                 plugin.getLogger().warning("New Sign the Hack version available: " + currentVersion + " -> " + latestVersion +
                         (downloadUrl.isBlank() ? "" : " (" + downloadUrl + ")"));
+                
+                if (cfg.autoDownload()) {
+                    String assetUrl = findFirstGroup(ASSET_DOWNLOAD_URL_PATTERN, body);
+                    if (!assetUrl.isBlank()) {
+                        downloadUpdate(assetUrl, latestVersion);
+                    } else {
+                        plugin.getLogger().warning("Auto-download failed: no .jar asset found in release.");
+                    }
+                }
             } else {
                 plugin.getLogger().info("Sign the Hack is up-to-date (" + currentVersion + ")");
             }
@@ -184,6 +196,29 @@ public final class UpdateCheckerService {
     private static String findFirstGroup(Pattern pattern, String text) {
         Matcher matcher = pattern.matcher(text);
         return matcher.find() ? matcher.group(1) : "";
+    }
+
+    private void downloadUpdate(String url, String version) {
+        try {
+            File updateFolder = plugin.getServer().getUpdateFolderFile();
+            if (!updateFolder.exists() && !updateFolder.mkdirs()) {
+                plugin.getLogger().warning("Could not create update folder.");
+                return;
+            }
+            
+            Path targetFile = new File(updateFolder, "Sign-the-Hack-" + version + ".jar").toPath();
+            HttpRequest request = HttpRequest.newBuilder(URI.create(url))
+                    .header("User-Agent", "SignTheHack-Updater")
+                    .timeout(Duration.ofMinutes(1))
+                    .GET()
+                    .build();
+            
+            plugin.getLogger().info("Downloading auto-update from " + url + "...");
+            httpClient.send(request, HttpResponse.BodyHandlers.ofFile(targetFile));
+            plugin.getLogger().info("Update downloaded successfully! It will be applied on the next server restart/reload.");
+        } catch (Exception ex) {
+            plugin.getLogger().warning("Failed to auto-download update: " + ex.getMessage());
+        }
     }
 
     private static String normalizeVersion(String version) {

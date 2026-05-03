@@ -6,6 +6,8 @@ locale: en
 
 update-checker:
   enabled: true
+  # Automatically downloads the jar to the updates folder?
+  auto-download: true
   # GitHub API endpoint that returns the latest release JSON.
   api-url: "https://api.github.com/repos/QinCai-rui/Sign-the-Hack/releases/latest"
   timeout-millis: 5000
@@ -21,7 +23,7 @@ probe:
   # Max checks packed in one probe sign (1-3 recommended)
   max-checks-per-sign: 3
   # Delay between sequential probe signs in ticks
-  delay-between-signs-ticks: 5
+  delay-between-signs-ticks: 10
   # Client response timeout in ticks. Timeout is classified as PROTECTED.
   timeout-ticks: 100
   # Hide probe signs/barriers from player view using client-side fake blocks.
