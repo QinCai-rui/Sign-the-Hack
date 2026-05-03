@@ -40,15 +40,11 @@ public final class ConfigManager {
         saveResourceIfAbsent("messages/ru.yml");
 
         // Update configurations
-        try {
-            ConfigUpdater.update(plugin, "config.yml", new File(plugin.getDataFolder(), "config.yml"));
-            ConfigUpdater.update(plugin, "checks.yml", new File(plugin.getDataFolder(), "checks.yml"));
-            String[] messageFiles = {"en.yml", "it.yml", "de.yml", "es.yml", "fr.yml", "pt.yml", "ru.yml"};
-            for (String file : messageFiles) {
-                ConfigUpdater.update(plugin, "messages/" + file, new File(plugin.getDataFolder(), "messages/" + file));
-            }
-        } catch (java.io.IOException e) {
-            plugin.getLogger().warning("Failed to update config files: " + e.getMessage());
+        ConfigUpdater.update(plugin, "config.yml", new File(plugin.getDataFolder(), "config.yml"));
+        ConfigUpdater.update(plugin, "checks.yml", new File(plugin.getDataFolder(), "checks.yml"));
+        String[] messageFiles = {"en.yml", "it.yml", "de.yml", "es.yml", "fr.yml", "pt.yml", "ru.yml"};
+        for (String file : messageFiles) {
+            ConfigUpdater.update(plugin, "messages/" + file, new File(plugin.getDataFolder(), "messages/" + file));
         }
 
         plugin.reloadConfig();
