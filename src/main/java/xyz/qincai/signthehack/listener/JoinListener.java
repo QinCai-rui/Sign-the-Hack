@@ -42,6 +42,10 @@ public final class JoinListener implements Listener {
             return;
         }
 
+        if (Bukkit.getServer().getTPS()[0] < cfg.auto().minTps()) {
+            return;
+        }
+
         Duration cd = Duration.ofSeconds(cfg.cooldown().joinSeconds());
         if (cooldownService.isCoolingDown(event.getPlayer().getUniqueId(), ScanReason.JOIN, cd)) {
             return;

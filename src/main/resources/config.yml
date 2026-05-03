@@ -74,6 +74,9 @@ auto:
     enabled: true
     delay-ticks: 20
     first-join-only: false
+    # Minimum TPS required to run on-join checks (default 17.0 ~= 58.82 MSPT). 
+    # If the server TPS is below this, on-join checks are skipped.
+    min-tps: 17.0
 
 cooldown:
   manual-seconds: 15

@@ -33,7 +33,7 @@ public record AppConfig(
         ) {
         }
 
-    public record AutoConfig(boolean enabled, long joinDelayTicks, boolean firstJoinOnly) {
+    public record AutoConfig(boolean enabled, long joinDelayTicks, boolean firstJoinOnly, double minTps) {
     }
 
     public record CooldownConfig(long manualSeconds, long joinSeconds, long anticheatSeconds) {

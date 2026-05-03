@@ -82,7 +82,8 @@ public final class ConfigManager {
         AppConfig.AutoConfig auto = new AppConfig.AutoConfig(
                 cfg.getBoolean("auto.join.enabled", true),
                 cfg.getLong("auto.join.delay-ticks", 60L),
-                cfg.getBoolean("auto.join.first-join-only", false)
+                cfg.getBoolean("auto.join.first-join-only", false),
+                cfg.getDouble("auto.join.min-tps", 17.0)
         );
         AppConfig.CooldownConfig cooldown = new AppConfig.CooldownConfig(
                 cfg.getLong("cooldown.manual-seconds", 10L),
