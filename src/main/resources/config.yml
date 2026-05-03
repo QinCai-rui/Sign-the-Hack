@@ -55,11 +55,7 @@ check-sets:
     - freecam
     - wurst
     - chestesp
-    - lumina
-    - autoswitch
-    - bleachhack
     - aristois
-    - coffee
     - world-downloader
     - antiafk
   # Used when anticheat-trigger scan occurs
