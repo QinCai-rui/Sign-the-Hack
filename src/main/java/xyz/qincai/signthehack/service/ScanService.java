@@ -34,6 +34,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 
 public final class ScanService {
+    public static final String EXEMPT_PERMISSION = "signthehack.exempt";
+
     private final JavaPlugin plugin;
     private final ConfigManager configManager;
     private final MessageService messageService;
@@ -52,6 +54,9 @@ public final class ScanService {
     }
 
     public synchronized UUID startScan(CommandSender checker, Player target, List<String> requestedChecks, ScanReason reason) {
+        if (isExempt(target)) {
+            return null;
+        }
         if (active.containsKey(target.getUniqueId())) {
             messenger.send(checker, messageService.get("probe-already-running", "<yellow>A scan is already running for this player.</yellow>"));
             return null;
@@ -250,6 +255,10 @@ public final class ScanService {
 
     public boolean isChecking(UUID playerId) {
         return active.containsKey(playerId);
+    }
+
+    public boolean isExempt(Player target) {
+        return target.hasPermission(EXEMPT_PERMISSION);
     }
 
     private String sanitize(String value) {

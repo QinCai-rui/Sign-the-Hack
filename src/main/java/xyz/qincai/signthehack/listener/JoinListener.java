@@ -38,6 +38,9 @@ public final class JoinListener implements Listener {
         if (!cfg.auto().enabled()) {
             return;
         }
+        if (scanService.isExempt(event.getPlayer())) {
+            return;
+        }
         if (cfg.auto().firstJoinOnly() && event.getPlayer().hasPlayedBefore()) {
             return;
         }

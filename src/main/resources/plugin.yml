@@ -15,6 +15,9 @@ commands:
     usage: /signthehack <player> [mod1,mod2,...] | reload | alerts | diagnose
     aliases: [sth, hacksign]
 permissions:
+  signthehack.exempt:
+    description: Exempt a player from all Sign the Hack checks
+    default: false
   signthehack.check:
     description: Allow scanning players and trigger scans
     default: op

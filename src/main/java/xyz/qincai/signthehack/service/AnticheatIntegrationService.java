@@ -61,6 +61,9 @@ public final class AnticheatIntegrationService {
         if (player == null) {
             return;
         }
+        if (scanService.isExempt(player)) {
+            return;
+        }
         Duration cooldown = Duration.ofSeconds(configManager.appConfig().cooldown().anticheatSeconds());
         if (cooldownService.isCoolingDown(player.getUniqueId(), ScanReason.ANTICHEAT, cooldown)) {
             return;
@@ -95,6 +98,9 @@ public final class AnticheatIntegrationService {
         String normalized = source.toLowerCase(Locale.ROOT);
         if (!List.of("grim", "vulcan", "spartan").contains(normalized)) {
             return false;
+        }
+        if (scanService.isExempt(player)) {
+            return true;
         }
         Duration cooldown = Duration.ofSeconds(configManager.appConfig().cooldown().anticheatSeconds());
         if (cooldownService.isCoolingDown(player.getUniqueId(), ScanReason.ANTICHEAT, cooldown)) {

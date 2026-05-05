@@ -104,6 +104,10 @@ public final class SignTheHackCommand implements CommandExecutor, TabCompleter {
             messenger.send(sender, messageService.get("player-not-found", "<red>Player not found.</red>"));
             return true;
         }
+        if (scanService.isExempt(target)) {
+            messenger.send(sender, messageService.render("scan-exempt-target", "<yellow><name> is exempt from all checks.</yellow>", Map.of("<name>", target.getName())));
+            return true;
+        }
         if (!anticheatIntegrationService.triggerFromCommand(target, source)) {
             messenger.send(sender, messageService.get("trigger-unknown", "<red>Unknown anticheat source.</red>"));
             return true;
@@ -120,6 +124,10 @@ public final class SignTheHackCommand implements CommandExecutor, TabCompleter {
         Player target = Bukkit.getPlayerExact(targetName);
         if (target == null) {
             messenger.send(sender, messageService.get("player-not-found", "<red>Player not found.</red>"));
+            return true;
+        }
+        if (scanService.isExempt(target)) {
+            messenger.send(sender, messageService.render("scan-exempt-target", "<yellow><name> is exempt from all checks.</yellow>", Map.of("<name>", target.getName())));
             return true;
         }
 
