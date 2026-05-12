@@ -110,9 +110,15 @@ public final class ConfigManager {
                 cfg.getStringList("actions.on-clean"),
                 cfg.getString("actions.reason-template", "<red>Sign the Hack result: <results>")
         );
+        ConfigurationSection actionsSection = cfg.getConfigurationSection("actions");
+        ConfigurationSection detectedBroadcastSection = actionsSection == null ? null : actionsSection.getConfigurationSection("detected-broadcast");
         AppConfig.DetectedBroadcastConfig detectedBroadcast = new AppConfig.DetectedBroadcastConfig(
-            cfg.getBoolean("detected-broadcast.enabled", false),
-            cfg.getString("detected-broadcast.command", "say <name> has been temporarily banned for using <hacks>. Be good kids")
+            detectedBroadcastSection != null
+                ? detectedBroadcastSection.getBoolean("enabled", false)
+                : cfg.getBoolean("detected-broadcast.enabled", false),
+            detectedBroadcastSection != null
+                ? detectedBroadcastSection.getString("command", "say <name> has been temporarily banned for using <hacks>. Be good kids")
+                : cfg.getString("detected-broadcast.command", "say <name> has been temporarily banned for using <hacks>. Be good kids")
         );
         AppConfig.WebhookConfig webhook = new AppConfig.WebhookConfig(
                 cfg.getBoolean("webhook.enabled", false),

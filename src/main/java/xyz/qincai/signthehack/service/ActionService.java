@@ -47,6 +47,9 @@ public final class ActionService {
 
         for (String command : actionCommands) {
             String rendered = render(command, report, checksSummary);
+            if (rendered == null || rendered.isBlank()) {
+                continue;
+            }
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), rendered);
         }
 

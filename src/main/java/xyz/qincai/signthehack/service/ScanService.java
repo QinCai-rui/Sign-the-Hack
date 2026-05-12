@@ -57,6 +57,9 @@ public final class ScanService {
         if (isExempt(target)) {
             return null;
         }
+        if (!isAutoScanAllowed(reason)) {
+            return null;
+        }
         if (active.containsKey(target.getUniqueId())) {
             messenger.send(checker, messageService.get("probe-already-running", "<yellow>A scan is already running for this player.</yellow>"));
             return null;
@@ -255,6 +258,13 @@ public final class ScanService {
 
     public boolean isChecking(UUID playerId) {
         return active.containsKey(playerId);
+    }
+
+    public boolean isAutoScanAllowed(ScanReason reason) {
+        if (reason == ScanReason.MANUAL) {
+            return true;
+        }
+        return Bukkit.getServer().getTPS()[0] >= configManager.appConfig().auto().minTps();
     }
 
     public boolean isExempt(Player target) {

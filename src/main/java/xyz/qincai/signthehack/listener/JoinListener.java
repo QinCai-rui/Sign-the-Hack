@@ -45,7 +45,7 @@ public final class JoinListener implements Listener {
             return;
         }
 
-        if (Bukkit.getServer().getTPS()[0] < cfg.auto().minTps()) {
+        if (!scanService.isAutoScanAllowed(ScanReason.JOIN)) {
             return;
         }
 

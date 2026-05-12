@@ -64,6 +64,9 @@ public final class AnticheatIntegrationService {
         if (scanService.isExempt(player)) {
             return;
         }
+        if (!scanService.isAutoScanAllowed(ScanReason.ANTICHEAT)) {
+            return;
+        }
         Duration cooldown = Duration.ofSeconds(configManager.appConfig().cooldown().anticheatSeconds());
         if (cooldownService.isCoolingDown(player.getUniqueId(), ScanReason.ANTICHEAT, cooldown)) {
             return;
@@ -100,6 +103,9 @@ public final class AnticheatIntegrationService {
             return false;
         }
         if (scanService.isExempt(player)) {
+            return true;
+        }
+        if (!scanService.isAutoScanAllowed(ScanReason.ANTICHEAT)) {
             return true;
         }
         Duration cooldown = Duration.ofSeconds(configManager.appConfig().cooldown().anticheatSeconds());
