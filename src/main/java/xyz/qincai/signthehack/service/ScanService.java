@@ -71,7 +71,7 @@ public final class ScanService {
             return null;
         }
 
-        if (shouldSkipBedrock(target.getName())) {
+        if (shouldSkipBedrock(target)) {
             List<CheckResult> skipped = checks.stream()
                     .map(c -> new CheckResult(c, CheckStatus.SKIPPED, "Skipped by prefix rule"))
                     .toList();
@@ -88,12 +88,20 @@ public final class ScanService {
         return context.scanId;
     }
 
-    private boolean shouldSkipBedrock(String name) {
+    private boolean shouldSkipBedrock(Player player) {
         AppConfig.BedrockSkipConfig bedrock = configManager.appConfig().bedrockSkip();
         if (!bedrock.enabled()) {
             return false;
         }
-        return bedrock.prefixes().stream().anyMatch(name::startsWith);
+        
+        // Better solution without Floodgate API: Floodgate v2 UUIDs start with 16 zeros
+        // This corresponds to the most significant bits being 0.
+        // This works even if Floodgate is only installed on Velocity!
+        if (player.getUniqueId().getMostSignificantBits() == 0L) {
+            return true;
+        }
+
+        return bedrock.prefixes().stream().anyMatch(player.getName()::startsWith);
     }
 
     private ArrayDeque<List<CheckDefinition>> batch(List<CheckDefinition> checks, int max) {
