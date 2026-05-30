@@ -198,15 +198,36 @@ public final class UpdateCheckerService {
         return matcher.find() ? matcher.group(1) : "";
     }
 
+    private boolean isPaperServer() {
+        String version = plugin.getServer().getVersion();
+        String name = plugin.getServer().getName();
+        if ((version != null && version.toLowerCase().contains("paper")) || 
+            (name != null && name.toLowerCase().contains("paper"))) {
+            return true;
+        }
+        try {
+            Class.forName("com.destroystokyo.paper.PaperConfig");
+            return true;
+        } catch (ClassNotFoundException ignored) {}
+        try {
+            Class.forName("io.papermc.paper.ServerBuildInfo");
+            return true;
+        } catch (ClassNotFoundException ignored) {}
+        return false;
+    }
+
     private void downloadUpdate(String url, String version) {
         try {
-            File updateFolder = plugin.getServer().getUpdateFolderFile();
-            if (!updateFolder.exists() && !updateFolder.mkdirs()) {
+            File targetFolder = isPaperServer() 
+                    ? new File(plugin.getDataFolder().getParentFile(), "update")
+                    : plugin.getDataFolder().getParentFile(); // plugins folder
+            
+            if (!targetFolder.exists() && !targetFolder.mkdirs()) {
                 plugin.getLogger().warning("Could not create update folder.");
                 return;
             }
             
-            Path targetFile = new File(updateFolder, "Sign-the-Hack-" + version + ".jar").toPath();
+            Path targetFile = new File(targetFolder, "Sign-the-Hack-" + version + ".jar").toPath();
             HttpRequest request = HttpRequest.newBuilder(URI.create(url))
                     .header("User-Agent", "SignTheHack-Updater")
                     .timeout(Duration.ofMinutes(1))
